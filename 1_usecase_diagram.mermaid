@@ -1,0 +1,137 @@
+%% ============================================================
+%%  EDU System – Use Case Diagram
+%%  Students enter school results to search for universities
+%%  + Chat system for university inquiries
+%% ============================================================
+graph TB
+    %% ── Actors ────────────────────────────────────────────
+    PubStudent(["👤 Public School\nStudent"])
+    AmerStudent(["👤 American School\nStudent"])
+    PrivStudent(["👤 Private School\nStudent"])
+    UniRep(["👤 University\nRepresentative"])
+    Admin(["👤 System Admin"])
+    System(["🤖 EDU System"])
+
+    subgraph EDU ["🎓 EDU – University Search & Chat System"]
+
+        %% ── Registration & Profile ───────────────────────
+        UC1["Register Account"]
+        UC2["Login / Logout"]
+        UC3["Select School Type\n(Public / American / Private)"]
+        UC4["Complete Student Profile"]
+
+        %% ── Academic Data Entry ──────────────────────────
+        UC5["Enter Public School Results\n(National Exam Grades)"]
+        UC6["Enter American School Results\n(SAT / ACT / GPA)"]
+        UC7["Enter Private School Results\n(IB / IGCSE / A-Level)"]
+        UC8["Upload Supporting Documents\n(Transcripts / Certificates)"]
+        UC9["Edit / Update Academic Data"]
+
+        %% ── University Search ────────────────────────────
+        UC10["Search for Universities"]
+        UC11["Filter by Location"]
+        UC12["Filter by University Type\n(Public / Private)"]
+        UC13["Filter by Tuition Fees Range"]
+        UC14["Filter by Available Programs"]
+        UC15["View University Profile\n(Details, Fees, Requirements)"]
+        UC16["Check Admission Eligibility\n(Match Results to Requirements)"]
+        UC17["Save / Bookmark Universities"]
+        UC18["Compare Universities"]
+
+        %% ── Chat System ──────────────────────────────────
+        UC19["Start Chat with University Rep"]
+        UC20["Ask About Location & Campus"]
+        UC21["Ask About Tuition Fees"]
+        UC22["Ask About Programs & Majors"]
+        UC23["Ask About Admission Requirements"]
+        UC24["Receive Automated FAQ Answers"]
+        UC25["View Chat History"]
+
+        %% ── Application ──────────────────────────────────
+        UC26["Submit University Application"]
+        UC27["Track Application Status"]
+        UC28["Receive Acceptance Notification"]
+
+        %% ── University Rep ───────────────────────────────
+        UC29["Manage University Profile"]
+        UC30["Respond to Student Chats"]
+        UC31["View Student Applicants"]
+        UC32["Update Admission Requirements"]
+
+        %% ── Admin ────────────────────────────────────────
+        UC33["Manage Users & Accounts"]
+        UC34["Add / Manage Universities"]
+        UC35["Monitor Chat System"]
+        UC36["Generate Reports"]
+        UC37["Manage School Grading Systems"]
+
+        %% ── System Auto ──────────────────────────────────
+        UC38["Auto-Match Student to Universities"]
+        UC39["Send Notification / Alert"]
+    end
+
+    %% Public Student associations
+    PubStudent --> UC1
+    PubStudent --> UC2
+    PubStudent --> UC3
+    PubStudent --> UC4
+    PubStudent --> UC5
+    PubStudent --> UC8
+    PubStudent --> UC9
+    PubStudent --> UC10
+    PubStudent --> UC15
+    PubStudent --> UC16
+    PubStudent --> UC17
+    PubStudent --> UC18
+    PubStudent --> UC19
+    PubStudent --> UC26
+    PubStudent --> UC27
+
+    AmerStudent --> UC1
+    AmerStudent --> UC2
+    AmerStudent --> UC3
+    AmerStudent --> UC6
+    AmerStudent --> UC8
+    AmerStudent --> UC10
+    AmerStudent --> UC16
+    AmerStudent --> UC19
+    AmerStudent --> UC26
+
+    PrivStudent --> UC1
+    PrivStudent --> UC2
+    PrivStudent --> UC3
+    PrivStudent --> UC7
+    PrivStudent --> UC8
+    PrivStudent --> UC10
+    PrivStudent --> UC16
+    PrivStudent --> UC19
+    PrivStudent --> UC26
+
+    %% University Rep
+    UniRep --> UC2
+    UniRep --> UC29
+    UniRep --> UC30
+    UniRep --> UC31
+    UniRep --> UC32
+
+    %% Admin
+    Admin --> UC2
+    Admin --> UC33
+    Admin --> UC34
+    Admin --> UC35
+    Admin --> UC36
+    Admin --> UC37
+
+    %% System
+    System --> UC24
+    System --> UC38
+    System --> UC39
+
+    %% Include / Extend
+    UC10 -.->|"«extend»"| UC11
+    UC10 -.->|"«extend»"| UC12
+    UC10 -.->|"«extend»"| UC13
+    UC16 -.->|"«include»"| UC38
+    UC26 -.->|"«include»"| UC16
+    UC28 -.->|"«include»"| UC39
+    UC19 -.->|"«extend»"| UC24

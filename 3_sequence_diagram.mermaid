@@ -1,0 +1,90 @@
+%% ============================================================
+%%  EDU System – Sequence Diagram
+%%  Scenario: Student registers, enters results, searches for a
+%%  university, chats with a rep, and submits an application
+%% ============================================================
+sequenceDiagram
+    autonumber
+
+    actor Student
+    participant Portal    as 🌐 EDU Portal
+    participant AuthSvc   as 🔐 Auth Service
+    participant ProfileSvc as 📋 Profile Service
+    participant SearchSvc  as 🔍 Search & Match Service
+    participant UniDB      as 🏛️ University Database
+    participant ChatSvc    as 💬 Chat Service
+    participant UniRep     as 👤 University Rep
+    participant NotifySvc  as 📧 Notification Service
+    participant AppSvc     as 📝 Application Service
+
+    %% ── Registration & Login ──────────────────────────────
+    Student->>Portal: Open EDU platform
+    Portal->>AuthSvc: Serve register/login page
+    Student->>Portal: Submit registration (name, email, school type)
+    Portal->>AuthSvc: Create account & issue JWT
+    AuthSvc-->>Portal: Session token returned
+    Portal-->>Student: Dashboard displayed ✅
+
+    %% ── Academic Profile Entry ────────────────────────────
+    Student->>Portal: Select school type (Public / American / Private)
+    Portal->>ProfileSvc: POST /profile/school-type
+    Student->>Portal: Enter grades & results
+    Note over Student,ProfileSvc: Public → National grades<br/>American → SAT/GPA<br/>Private → IB/IGCSE
+    Portal->>ProfileSvc: POST /profile/results {grades, documents}
+    ProfileSvc-->>Portal: Academic profile saved ✅
+
+    %% ── University Matching ───────────────────────────────
+    Portal->>SearchSvc: POST /match {studentProfile}
+    SearchSvc->>UniDB: Query universities matching grades & requirements
+    UniDB-->>SearchSvc: Return eligible university list
+    SearchSvc-->>Portal: Ranked match results
+    Portal-->>Student: Display matched universities 🎓
+
+    %% ── Filter & Search ──────────────────────────────────
+    Student->>Portal: Apply filters (location, fees, program)
+    Portal->>SearchSvc: GET /universities?location=X&fees=Y&program=Z
+    SearchSvc->>UniDB: Filtered query
+    UniDB-->>SearchSvc: Filtered results
+    SearchSvc-->>Portal: Filtered university list
+    Portal-->>Student: Updated listings
+
+    %% ── View University Details ───────────────────────────
+    Student->>Portal: Click on university
+    Portal->>UniDB: GET /universities/{uniId}
+    UniDB-->>Portal: University details (fees, location, programs, requirements)
+    Portal-->>Student: University profile page
+
+    %% ── Chat System ───────────────────────────────────────
+    Student->>Portal: Click "Chat with University"
+    Portal->>ChatSvc: POST /chat/start {studentId, uniId}
+    ChatSvc-->>Portal: Chat session created (chatId)
+    Portal-->>Student: Chat window opened 💬
+
+    Student->>Portal: Send message "What are the tuition fees?"
+    Portal->>ChatSvc: POST /chat/{chatId}/message {text}
+    ChatSvc->>UniRep: Deliver message (push notification)
+    UniRep-->>ChatSvc: Reply "Fees are $X/year for your program"
+    ChatSvc-->>Portal: Deliver reply to student
+    Portal-->>Student: Message received ✅
+
+    Student->>Portal: Send "Where is the campus located?"
+    Portal->>ChatSvc: POST /chat/{chatId}/message
+    ChatSvc->>UniRep: Deliver message
+    UniRep-->>ChatSvc: "Campus is in [City], [Map Link]"
+    ChatSvc-->>Portal: Deliver reply
+    Portal-->>Student: Location info received
+
+    %% ── Application Submission ────────────────────────────
+    Student->>Portal: Click "Apply Now"
+    Portal->>AppSvc: POST /applications/create {studentId, uniId}
+    AppSvc->>ProfileSvc: GET /profile/{studentId} (auto-fill data)
+    ProfileSvc-->>AppSvc: Student academic profile
+    AppSvc-->>Portal: Application form pre-filled
+    Student->>Portal: Confirm & submit application
+    Portal->>AppSvc: POST /applications/submit
+    AppSvc->>UniDB: Store application record
+    AppSvc->>NotifySvc: Trigger confirmation notification
+    NotifySvc-->>Student: 📧 Application confirmation email
+    NotifySvc-->>UniRep: 📧 New application received alert
+    AppSvc-->>Portal: Submission successful
+    Portal-->>Student: "Application submitted!" ✅

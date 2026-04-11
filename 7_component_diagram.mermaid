@@ -1,0 +1,88 @@
+%% ============================================================
+%%  EDU System – Component Diagram
+%% ============================================================
+graph TB
+    subgraph Clients["🖥️ Client Layer"]
+        WEB["Web Application\n(React / Next.js)"]
+        MOB["Mobile App\n(React Native / PWA)"]
+    end
+
+    subgraph Gateway["🔀 API Gateway"]
+        GW["API Gateway\n(REST / GraphQL)"]
+        AUTH_MW["Auth Middleware\n(JWT Validation)"]
+        RATE["Rate Limiter"]
+    end
+
+    subgraph CoreServices["⚙️ Core Backend Services"]
+
+        AUTH_SVC["🔐 Auth Service\n─────────────────\n• register()\n• login()\n• verifyEmail()\n• resetPassword()"]
+
+        PROFILE_SVC["📋 Student Profile Service\n─────────────────\n• createProfile()\n• enterPublicResults()\n• enterAmericanResults()\n• enterPrivateResults()\n• uploadDocuments()\n• validateProfile()"]
+
+        SEARCH_SVC["🔍 Search & Match Service\n─────────────────\n• searchUniversities(filters)\n• autoMatchByResults()\n• rankUniversities()\n• compareUniversities()"]
+
+        UNI_SVC["🏛️ University Service\n─────────────────\n• getUniversityDetails()\n• listFaculties()\n• listPrograms()\n• getAdmissionReqs()\n• checkEligibility()"]
+
+        CHAT_SVC["💬 Chat Service\n─────────────────\n• createChatSession()\n• sendMessage()\n• getChatHistory()\n• closeChatSession()\n• escalateToRep()"]
+
+        FAQ_SVC["🤖 FAQ / Bot Service\n─────────────────\n• answerQuery()\n• getUniSpecificFAQ()\n• suggestUniversities()"]
+
+        APP_SVC["📝 Application Service\n─────────────────\n• createApplication()\n• submitApplication()\n• trackStatus()\n• withdrawApplication()"]
+
+        NOTIFY_SVC["📧 Notification Service\n─────────────────\n• sendEmail()\n• sendSMS()\n• pushNotification()"]
+
+        REPORT_SVC["📊 Report Service\n─────────────────\n• studentReport()\n• applicationReport()\n• universityReport()"]
+    end
+
+    subgraph DataLayer["🗄️ Data Layer"]
+        MAIN_DB[("PostgreSQL\nMain Database\n• Users\n• Students\n• Universities\n• Applications")]
+        CHAT_DB[("MongoDB\nChat Database\n• Messages\n• Sessions")]
+        CACHE[("Redis\nCache\n• Sessions\n• Search Results")]
+        FILE_STORE["☁️ File Storage\n(AWS S3)\n• Transcripts\n• Certificates"]
+        SEARCH_IDX[("Elasticsearch\nSearch Index\n• University Search")]
+    end
+
+    subgraph External["🌐 External Integrations"]
+        EMAIL_SVC["📧 Email Provider\n(SendGrid)"]
+        SMS_SVC["📱 SMS Gateway\n(Twilio)"]
+        MAP_SVC["🗺️ Maps API\n(Google Maps)\nUniversity Locations"]
+    end
+
+    %% Client to Gateway
+    WEB -->|HTTPS| GW
+    MOB -->|HTTPS| GW
+
+    %% Gateway chain
+    GW --> RATE --> AUTH_MW
+    AUTH_MW --> AUTH_SVC
+    AUTH_MW --> PROFILE_SVC
+    AUTH_MW --> SEARCH_SVC
+    AUTH_MW --> UNI_SVC
+    AUTH_MW --> CHAT_SVC
+    AUTH_MW --> APP_SVC
+    AUTH_MW --> REPORT_SVC
+
+    %% Service dependencies
+    SEARCH_SVC --> UNI_SVC
+    SEARCH_SVC --> PROFILE_SVC
+    APP_SVC --> PROFILE_SVC
+    APP_SVC --> UNI_SVC
+    APP_SVC --> NOTIFY_SVC
+    CHAT_SVC --> FAQ_SVC
+    CHAT_SVC --> NOTIFY_SVC
+
+    %% Data access
+    AUTH_SVC --> MAIN_DB
+    PROFILE_SVC --> MAIN_DB
+    PROFILE_SVC --> FILE_STORE
+    UNI_SVC --> MAIN_DB
+    SEARCH_SVC --> SEARCH_IDX
+    SEARCH_SVC --> CACHE
+    CHAT_SVC --> CHAT_DB
+    APP_SVC --> MAIN_DB
+    REPORT_SVC --> MAIN_DB
+
+    %% External
+    NOTIFY_SVC --> EMAIL_SVC
+    NOTIFY_SVC --> SMS_SVC
+    UNI_SVC --> MAP_SVC

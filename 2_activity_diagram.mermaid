@@ -1,0 +1,83 @@
+%% ============================================================
+%%  EDU System – Activity Diagram
+%%  Flow: Student Registers → Enters Results → Finds University
+%%        → Chats → Applies
+%% ============================================================
+flowchart TD
+    Start(["🟢 Start"])
+
+    A["Student Visits EDU Platform"]
+    B{{"Already Registered?"}}
+    C["Register Account\n(Name, Email, Password)"]
+    D["Login"]
+    E["Select School Type"]
+
+    subgraph SchoolBranch ["📚 Academic Data Entry (by school type)"]
+        F1["Enter Public School Results\n(National Exam / Thanaweya Amma)"]
+        F2["Enter American School Results\n(SAT / ACT / GPA / AP)"]
+        F3["Enter Private School Results\n(IB / IGCSE / A-Level)"]
+    end
+
+    G["Upload Certificates / Transcripts"]
+    H["Submit Academic Profile"]
+    I["System Auto-Matches Universities\nbased on Results & Grades"]
+    J{{"Matches Found?"}}
+    K["Browse All Universities Manually"]
+    L["View Matched Universities List"]
+    M["Apply Filters\n(Location / Fees / Program / Type)"]
+    N["View University Details\n(Programs, Fees, Location, Requirements)"]
+    O{{"Meets Admission Requirements?"}}
+    P["Mark as Ineligible – Continue Search"]
+    Q{{"Need More Info?"}}
+    R["Open Chat with University Rep"]
+    S["Ask Questions\n(Fees / Location / Programs / Campus)"]
+    T{{"Chat Response Received?"}}
+    U["Wait for Rep Response\nor View FAQ Answers"]
+    V{{"Satisfied with University?"}}
+    W["Bookmark / Save University"]
+    X{{"Compare with Others?"}}
+    Y["Add to Comparison List\nCompare Side by Side"]
+    Z{{"Ready to Apply?"}}
+    AA["Submit Application\n(Auto-fills from Academic Profile)"]
+    AB["Track Application Status"]
+    AC{{"Application Accepted?"}}
+    AD["Receive Acceptance Notification 🎉"]
+    AE["Receive Rejection – Search Again"]
+    End(["🔴 End"])
+
+    Start --> A --> B
+    B -- No --> C --> D
+    B -- Yes --> D
+    D --> E
+
+    E -- Public --> F1
+    E -- American --> F2
+    E -- Private --> F3
+
+    F1 --> G
+    F2 --> G
+    F3 --> G
+
+    G --> H --> I --> J
+    J -- No --> K --> M
+    J -- Yes --> L --> M
+    M --> N --> O
+    O -- No --> P --> M
+    O -- Yes --> Q
+    Q -- Yes --> R --> S --> T
+    T -- No --> U --> T
+    T -- Yes --> V
+    Q -- No --> V
+    V -- No --> M
+    V -- Yes --> W --> X
+    X -- Yes --> Y --> Z
+    X -- No --> Z
+    Z -- No --> M
+    Z -- Yes --> AA --> AB --> AC
+    AC -- Yes --> AD --> End
+    AC -- No --> AE --> M
+
+    style Start fill:#2ecc71,color:#fff
+    style End fill:#e74c3c,color:#fff
+    style AD fill:#27ae60,color:#fff
+    style AE fill:#e67e22,color:#fff

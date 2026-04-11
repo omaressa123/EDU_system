@@ -1,0 +1,73 @@
+%% ============================================================
+%%  EDU System – State Diagram
+%%  Entity: Student Application Lifecycle
+%% ============================================================
+stateDiagram-v2
+    [*] --> Unregistered : Student visits EDU platform
+
+    %% Registration
+    Unregistered --> Registered : Student creates account
+    Registered --> ProfileIncomplete : Logs in for first time
+
+    ProfileIncomplete --> SchoolTypeSelected : Student picks school type
+    SchoolTypeSelected --> ResultsEntered    : Student inputs grades/results
+    ResultsEntered --> DocumentsUploaded     : Uploads transcripts & certificates
+    DocumentsUploaded --> ProfileComplete    : All data validated ✅
+
+    %% Search & matching
+    ProfileComplete --> Searching : Student triggers university search
+    Searching --> MatchesFound   : System auto-matches universities
+    Searching --> NoMatches      : No universities match criteria
+    NoMatches --> Searching      : Student adjusts filters / updates results
+
+    %% Chat
+    MatchesFound --> Browsing : Student reviews matched universities
+    Browsing --> ChatInitiated : Student opens chat with university rep
+    ChatInitiated --> WaitingForReply : Message sent to rep
+    WaitingForReply --> ChatActive : Rep responds
+    ChatActive --> WaitingForReply : Student sends follow-up
+    ChatActive --> ChatClosed : Student ends conversation
+    ChatClosed --> Browsing : Student returns to listings
+
+    %% Bookmarking & comparing
+    Browsing --> Bookmarked : Student saves a university
+    Bookmarked --> Comparing : Student adds to comparison list
+    Comparing --> Browsing : Student continues searching
+
+    %% Application
+    Browsing --> ApplicationDraft : Student clicks "Apply Now"
+    Bookmarked --> ApplicationDraft : Student applies from bookmarks
+    ApplicationDraft --> ApplicationSubmitted : Student confirms & submits
+
+    ApplicationSubmitted --> UnderReview : University rep reviews application
+    UnderReview --> AdditionalDocsRequested : Rep requests more documents
+    AdditionalDocsRequested --> UnderReview : Student uploads requested docs
+    UnderReview --> Accepted : Application approved 🎉
+    UnderReview --> Rejected : Application declined
+
+    Accepted --> EnrollmentPending : Student receives acceptance email
+    EnrollmentPending --> Enrolled : Student confirms enrollment
+    EnrollmentPending --> Declined : Student declines the offer
+
+    Rejected --> Browsing : Student searches for another university
+    Declined --> Browsing : Student looks for alternatives
+
+    Enrolled --> [*] : Process complete ✅
+    Declined --> [*]
+
+    note right of MatchesFound
+        System ranks universities
+        by compatibility score
+        based on student grades.
+    end note
+
+    note right of ChatInitiated
+        FAQ Bot handles common
+        questions automatically.
+        Rep handles complex ones.
+    end note
+
+    note right of Accepted
+        Acceptance notification
+        sent via Email & SMS.
+    end note

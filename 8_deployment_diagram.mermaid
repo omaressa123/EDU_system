@@ -1,0 +1,97 @@
+%% ============================================================
+%%  EDU System – Deployment Diagram
+%% ============================================================
+graph TB
+    subgraph UserDevices["👥 User Devices"]
+        BROWSER["🌐 Web Browser\n(Student / Rep / Admin)\nReact App"]
+        MOBILE["📱 Mobile Device\n(PWA / React Native)"]
+    end
+
+    subgraph CDN["☁️ CDN (Cloudflare / AWS CloudFront)"]
+        STATIC["Static Assets\n(JS, CSS, Images)\nEDU Frontend Build"]
+    end
+
+    subgraph Cloud["☁️ Cloud Infrastructure (AWS / GCP)"]
+
+        subgraph Entry["🔀 Entry Point"]
+            WAF["Web Application Firewall"]
+            LB["Load Balancer\n(AWS ALB)"]
+        end
+
+        subgraph AppCluster["⚙️ Application Server Cluster (Docker / K8s)"]
+            APP1["App Server 1\nNode.js :4000\n(API + Business Logic)"]
+            APP2["App Server 2\nNode.js :4000\n(API + Business Logic)"]
+            CHAT_NODE["Chat Server\nSocket.IO :5000\n(Real-time Messaging)"]
+        end
+
+        subgraph AuthCluster["🔐 Auth Service"]
+            AUTH_NODE["Auth Server\nJWT + OAuth2 :4001"]
+        end
+
+        subgraph SearchCluster["🔍 Search Engine"]
+            ELASTIC["Elasticsearch :9200\nUniversity & Program Index"]
+        end
+
+        subgraph DBCluster["🗄️ Database Cluster"]
+            PG_PRIMARY[("PostgreSQL Primary\n:5432\nUsers, Students,\nUniversities, Apps")]
+            PG_REPLICA[("PostgreSQL Replica\n:5432\nRead-Only Mirror")]
+            MONGO[("MongoDB :27017\nChat Messages\n& Sessions")]
+            REDIS[("Redis :6379\nSession Cache\nSearch Cache")]
+        end
+
+        subgraph Storage["📁 Object Storage"]
+            S3["AWS S3 Bucket\nStudent Documents\nCertificates\nTranscripts"]
+        end
+
+        subgraph Monitoring["📊 Monitoring Stack"]
+            PROM["Prometheus\nMetrics Collection"]
+            GRAFANA["Grafana\nDashboards"]
+            ELK["ELK Stack\nLog Aggregation"]
+        end
+    end
+
+    subgraph External["🌐 External Services"]
+        SENDGRID["📧 SendGrid\nEmail Delivery"]
+        TWILIO["📱 Twilio\nSMS Notifications"]
+        GMAPS["🗺️ Google Maps API\nUniversity Locations"]
+    end
+
+    %% Flow
+    BROWSER -->|HTTPS :443| WAF
+    MOBILE  -->|HTTPS :443| WAF
+    BROWSER -->|Static| STATIC
+
+    WAF --> LB
+    LB --> APP1
+    LB --> APP2
+    LB --> CHAT_NODE
+
+    APP1 --> AUTH_NODE
+    APP2 --> AUTH_NODE
+
+    APP1 -->|Read/Write| PG_PRIMARY
+    APP2 -->|Read/Write| PG_PRIMARY
+    PG_PRIMARY -->|Replicate| PG_REPLICA
+    APP1 -->|Read| PG_REPLICA
+
+    APP1 --> REDIS
+    APP2 --> REDIS
+
+    CHAT_NODE --> MONGO
+    CHAT_NODE --> REDIS
+
+    APP1 --> ELASTIC
+    APP2 --> ELASTIC
+
+    APP1 --> S3
+    APP2 --> S3
+
+    APP1 -->|API| SENDGRID
+    APP1 -->|API| TWILIO
+    APP1 -->|API| GMAPS
+
+    APP1 -.->|Metrics| PROM
+    APP2 -.->|Metrics| PROM
+    PROM --> GRAFANA
+    APP1 -.->|Logs| ELK
+    APP2 -.->|Logs| ELK
