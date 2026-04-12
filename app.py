@@ -11,6 +11,13 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Ensure the instance folder exists for the SQLite database
+    import os
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
     # Initialize DB
     db.init_app(app)
 

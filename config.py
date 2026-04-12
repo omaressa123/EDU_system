@@ -3,9 +3,12 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.env'))
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///edu_system.db')
+    # Use DATABASE_URL from env, or default to a persistent path in the instance folder
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'instance', 'edu_system.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-12345')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-fallback-12345')

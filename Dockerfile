@@ -21,11 +21,11 @@ COPY . .
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONPATH /app
-ENV FLASK_APP EDU_system/app.py
+ENV FLASK_APP app.py
 
 # Expose the port the app runs on
 EXPOSE 5000
 
-# Run the seeding script and then start the application
-# We use a shell script or a combined command to ensure data is present
-CMD python EDU_system/seed_egypt.py && gunicorn --bind 0.0.0.0:5000 "EDU_system.app:create_app()"
+# Run the seeding script and then start the application using gunicorn
+# We use a shell command to ensure both seeding and starting happen
+CMD python seed_egypt.py && gunicorn --bind 0.0.0.0:5000 "app:create_app()"
