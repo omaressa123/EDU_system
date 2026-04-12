@@ -1,0 +1,270 @@
+// State Management
+let currentUser = null;
+let currentChatId = null;
+
+// Auth Forms
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const logoutBtn = document.getElementById('logout-btn');
+
+// Sections
+const authSection = document.getElementById('auth-section');
+const dashboardSection = document.getElementById('dashboard-section');
+const userInfo = document.getElementById('user-info');
+const usernameDisplay = document.getElementById('username-display');
+
+// Profile Form
+const resultsForm = document.getElementById('results-form');
+const publicFields = document.getElementById('public-fields');
+const americanFields = document.getElementById('american-fields');
+const privateFields = document.getElementById('private-fields');
+const regSchoolType = document.getElementById('reg-school-type');
+
+// Matching & Search
+const findMatchesBtn = document.getElementById('find-matches-btn');
+const matchesList = document.getElementById('matches-list');
+
+// Chat
+const chatMessages = document.getElementById('chat-messages');
+const chatInputText = document.getElementById('chat-input-text');
+const sendChatBtn = document.getElementById('send-chat-btn');
+
+// --- Navigation ---
+function showTab(tab) {
+    if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+    } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    }
+}
+
+// --- Auth ---
+loginForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            currentUser = data;
+            loginSuccess();
+        } else {
+            alert(data.message);
+        }
+    } catch (err) {
+        console.error('Login failed:', err);
+    }
+};
+
+registerForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const school_type = document.getElementById('reg-school-type').value;
+
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, school_type })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert('Registration successful! Please login.');
+            showTab('login');
+        } else {
+            alert(data.message);
+        }
+    } catch (err) {
+        console.error('Registration failed:', err);
+    }
+};
+
+function loginSuccess() {
+    authSection.classList.add('hidden');
+    dashboardSection.classList.remove('hidden');
+    userInfo.classList.remove('hidden');
+    usernameDisplay.innerText = `User ID: ${currentUser.user_id}`;
+    
+    // Check school type and show relevant fields
+    // (In a real app, you'd fetch student details from the backend)
+    // For now, let's assume the user knows their type.
+    publicFields.classList.remove('hidden'); 
+    loadInitialData();
+}
+
+logoutBtn.onclick = () => {
+    localStorage.removeItem('token');
+    currentUser = null;
+    location.reload();
+};
+
+// --- Profile ---
+resultsForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const score = document.getElementById('national-score').value;
+    const year = document.getElementById('exam-year').value;
+
+    try {
+        const response = await fetch('/api/profile/results', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                student_id: currentUser.user_id,
+                school_type: 'public',
+                national_exam_score: parseFloat(score),
+                exam_year: year
+            })
+        });
+        const data = await response.json();
+        alert(data.message);
+    } catch (err) {
+        console.error('Update results failed:', err);
+    }
+};
+
+// --- Matching ---
+findMatchesBtn.onclick = async () => {
+    try {
+        const response = await fetch('/api/search/match', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: currentUser.user_id })
+        });
+        const data = await response.json();
+        displayMatches(data);
+    } catch (err) {
+        console.error('Matching failed:', err);
+    }
+};
+
+function displayMatches(matches) {
+    matchesList.innerHTML = '';
+    if (matches.length === 0) {
+        matchesList.innerHTML = '<p>No matches found yet. Try updating your results.</p>';
+        return;
+    }
+
+    matches.forEach(match => {
+        const div = document.createElement('div');
+        div.className = 'match-card';
+        div.innerHTML = `
+            <h4>${match.name}</h4>
+            <p>Location: ${match.location} | Type: ${match.type}</p>
+            <ul>
+                ${match.programs.map(p => `
+                    <li><strong>${p.name}</strong> - ${p.faculty} (Fees: ${p.fees} EGP) 
+                    <button onclick="applyNow(${match.uni_id}, ${p.program_id})">Apply</button></li>
+                `).join('')}
+            </ul>
+            <button onclick="startChat(${match.uni_id})">Chat with Rep</button>
+        `;
+        matchesList.appendChild(div);
+    });
+}
+
+// --- Application ---
+async function applyNow(uniId, programId) {
+    try {
+        const response = await fetch('/api/application/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                student_id: currentUser.user_id,
+                uni_id: uniId,
+                program_id: programId,
+                notes: 'Applied via EDU Portal'
+            })
+        });
+        const data = await response.json();
+        alert(data.message);
+        loadApplications();
+    } catch (err) {
+        console.error('Application failed:', err);
+    }
+}
+
+async function loadApplications() {
+    try {
+        const response = await fetch(`/api/application/status/${currentUser.user_id}`);
+        const data = await response.json();
+        const appList = document.getElementById('applications-list');
+        appList.innerHTML = data.map(app => `
+            <div class="match-card">
+                <p><strong>${app.uni_name}</strong> - ${app.program_name}</p>
+                <p>Status: <span class="status-${app.status}">${app.status}</span></p>
+                <p>Date: ${new Date(app.submitted_at).toLocaleDateString()}</p>
+            </div>
+        `).join('') || '<p>No applications submitted yet.</p>';
+    } catch (err) {
+        console.error('Load applications failed:', err);
+    }
+}
+
+// --- Chat ---
+async function startChat(uniId) {
+    try {
+        const response = await fetch('/api/chat/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: currentUser.user_id, uni_id: uniId })
+        });
+        const data = await response.json();
+        currentChatId = data.chat_id;
+        chatMessages.innerHTML = '<div class="message bot-msg">Connected to University Support. How can we help?</div>';
+    } catch (err) {
+        console.error('Chat start failed:', err);
+    }
+}
+
+sendChatBtn.onclick = async () => {
+    const text = chatInputText.value;
+    if (!text || !currentChatId) return;
+
+    addMessage(text, 'student-msg');
+    chatInputText.value = '';
+
+    try {
+        const response = await fetch('/api/chat/message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: currentChatId,
+                sender_id: currentUser.user_id,
+                content: text
+            })
+        });
+        const data = await response.json();
+        if (data.bot_response) {
+            addMessage(data.bot_response, 'bot-msg');
+        }
+    } catch (err) {
+        console.error('Send message failed:', err);
+    }
+};
+
+function addMessage(text, type) {
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    div.innerHTML = text; // Changed from innerText to innerHTML to render links
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function loadInitialData() {
+    loadApplications();
+}

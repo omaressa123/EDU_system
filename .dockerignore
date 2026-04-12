@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.git/
+.github/
+.vscode/
+edu_system.db
+*.log
+frontend/
+node_modules/
+dist/
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  edu-system:
+    build: .
+    container_name: edu_system_container
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=sqlite:///edu_system.db
+      - SECRET_KEY=prod-secret-key-12345
+      - FLASK_ENV=production
+    volumes:
+      - ./EDU_system:/app/EDU_system
+    restart: always
+
+# You can add a postgres service here in the future as per the architecture diagram
