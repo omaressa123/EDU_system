@@ -7,8 +7,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
 
 class Config:
-    # Use DATABASE_URL from env, or default to a persistent path in the instance folder
+    # Standard SQLite path that works inside the EDU_system package folder
+    # This is more reliable for Docker volume mapping
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'instance', 'edu_system.db')
+        'sqlite:///' + os.path.join(basedir, 'edu_system.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-fallback-12345')
