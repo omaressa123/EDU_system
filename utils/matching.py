@@ -4,13 +4,26 @@ def match_universities(student, universities):
     This is a simplified version of the algorithm.
     """
     matched = []
-    student_profile = student.academic_profile
+    
+    # Ensure we have the full student profile including subclass attributes
+    # In case student was fetched as a generic Student object
+    from EDU_system.models import PublicSchoolStudent, AmericanSchoolStudent, PrivateSchoolStudent
+    
+    if student.school_type == 'public':
+        student = PublicSchoolStudent.query.get(student.id)
+    elif student.school_type == 'american':
+        student = AmericanSchoolStudent.query.get(student.id)
+    elif student.school_type == 'private':
+        student = PrivateSchoolStudent.query.get(student.id)
+
+    student_profile = student.academic_profile if student else None
     if not student_profile:
         return []
 
     for uni in universities:
         # Check if the university accepts the student's curriculum
-        if student.school_type not in uni.accepted_curriculums:
+        accepted = uni.accepted_curriculums or []
+        if student.school_type not in accepted:
             continue
 
         # Check eligibility for each program
@@ -20,13 +33,16 @@ def match_universities(student, universities):
                 # Get the student's relevant score based on school type
                 score = 0
                 if student.school_type == 'public':
-                    score = student.national_exam_score
+                    score = getattr(student, 'national_exam_score', 0) or 0
                 elif student.school_type == 'american':
-                    score = student.gpa * 25 # Convert GPA to 0-100 scale for comparison
+                    gpa = getattr(student, 'gpa', 0) or 0
+                    score = gpa * 25 # Convert GPA to 0-100 scale for comparison
                 elif student.school_type == 'private':
-                    score = student.ib_score * 2.5 # Convert IB to 0-100 scale
+                    ib = getattr(student, 'ib_score', 0) or 0
+                    score = ib * 2.5 # Convert IB to 0-100 scale
 
-                if score >= program.min_grade_required:
+                min_grade = program.min_grade_required or 0
+                if score >= min_grade:
                     eligible_programs.append({
                         'program_id': program.id,
                         'name': program.name,

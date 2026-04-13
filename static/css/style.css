@@ -21,17 +21,48 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 2rem;
+}
+
+#app-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-link {
+    background: transparent;
+    border: none;
+    color: #bdc3c7;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    border-radius: 4px;
+}
+
+.nav-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+}
+
+.nav-link.active {
+    color: #fff;
+    background: #3498db;
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
+    white-space: nowrap;
 }
 
 #user-info {
     display: flex;
     gap: 1rem;
     align-items: center;
+    white-space: nowrap;
 }
 
 #logout-btn {
@@ -44,9 +75,62 @@ nav {
 }
 
 main {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 2rem auto;
     padding: 0 1rem;
+}
+
+.page {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.info-item {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.info-item h4 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.info-item ul {
+    list-style-position: inside;
+}
+
+.info-item li {
+    margin-bottom: 0.5rem;
+}
+
+.primary-btn {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.cta {
+    text-align: center;
+    padding: 2rem 0;
 }
 
 .card {

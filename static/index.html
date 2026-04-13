@@ -10,6 +10,13 @@
     <header>
         <nav>
             <div class="logo">🎓 EDU System</div>
+            <div id="app-nav" class="hidden">
+                <button class="nav-link" onclick="navigateTo('dashboard')">Dashboard</button>
+                <button class="nav-link" onclick="navigateTo('degree')">Enter Degree</button>
+                <button class="nav-link" onclick="navigateTo('search')">Find Universities</button>
+                <button class="nav-link" onclick="navigateTo('chat')">Chat Support</button>
+                <button class="nav-link" onclick="navigateTo('info')">Why Us?</button>
+            </div>
             <div id="user-info" class="hidden">
                 <span id="username-display"></span>
                 <button id="logout-btn">Logout</button>
@@ -47,57 +54,98 @@
             </form>
         </section>
 
-        <!-- Student Dashboard -->
-        <section id="dashboard-section" class="hidden">
-            <div class="grid">
-                <!-- Academic Results -->
-                <div class="card">
-                    <h3>Academic Profile</h3>
-                    <form id="results-form">
-                        <div id="public-fields" class="hidden">
-                            <input type="number" step="0.1" id="national-score" placeholder="National Exam Score (%)">
-                            <input type="text" id="exam-year" placeholder="Exam Year">
+        <!-- Page 1: Dashboard -->
+        <section id="dashboard-page" class="page hidden">
+            <div class="card">
+                <h2>Welcome to EDU System</h2>
+                <p>Welcome back! Here's a quick overview of your progress.</p>
+                <div class="grid mt-2">
+                    <div class="stat-card">
+                        <h3>My Applications</h3>
+                        <div id="applications-list" class="results-container">
+                            <!-- Applications will appear here -->
                         </div>
-                        <div id="american-fields" class="hidden">
-                            <input type="number" step="0.01" id="gpa" placeholder="GPA">
-                            <input type="number" id="sat-score" placeholder="SAT Score">
-                        </div>
-                        <div id="private-fields" class="hidden">
-                            <input type="text" id="curriculum" placeholder="Curriculum (IB/IGCSE)">
-                            <input type="number" step="0.1" id="ib-score" placeholder="IB Score">
-                        </div>
-                        <button type="submit">Update Results</button>
-                    </form>
-                </div>
-
-                <!-- University Matching -->
-                <div class="card">
-                    <h3>Find Your University</h3>
-                    <button id="find-matches-btn">Auto-Match Universities</button>
-                    <div id="matches-list" class="results-container">
-                        <!-- Matches will appear here -->
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Applications & Chat -->
-            <div class="grid mt-2">
-                <div class="card">
-                    <h3>My Applications</h3>
-                    <div id="applications-list" class="results-container">
-                        <!-- Applications will appear here -->
+        <!-- Page 2: Degree Entry -->
+        <section id="degree-page" class="page hidden">
+            <div class="card">
+                <h3>Academic Profile</h3>
+                <p>Enter your grades to find the best universities for you.</p>
+                <form id="results-form">
+                    <div id="public-fields" class="hidden">
+                        <input type="number" step="0.1" id="national-score" placeholder="National Exam Score (%)">
+                        <input type="text" id="exam-year" placeholder="Exam Year">
+                    </div>
+                    <div id="american-fields" class="hidden">
+                        <input type="number" step="0.01" id="gpa" placeholder="GPA">
+                        <input type="number" id="sat-score" placeholder="SAT Score">
+                    </div>
+                    <div id="private-fields" class="hidden">
+                        <input type="text" id="curriculum" placeholder="Curriculum (IB/IGCSE)">
+                        <input type="number" step="0.1" id="ib-score" placeholder="IB Score">
+                    </div>
+                    <button type="submit">Update Results</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Page 3: University Search -->
+        <section id="search-page" class="page hidden">
+            <div class="card">
+                <h3>Find Your University</h3>
+                <p>Based on your grades, these universities are a great match.</p>
+                <button id="find-matches-btn" class="primary-btn">Auto-Match Universities</button>
+                <div id="matches-list" class="results-container mt-2">
+                    <!-- Matches will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 4: Chat -->
+        <section id="chat-page" class="page hidden">
+            <div class="card">
+                <h3>Chat Support</h3>
+                <p>Connect with university representatives or our FAQ bot.</p>
+                <div id="chat-container">
+                    <div id="chat-messages" class="chat-box"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chat-input-text" placeholder="Ask a question...">
+                        <button id="send-chat-btn">Send</button>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="card">
-                    <h3>Chat Support</h3>
-                    <div id="chat-container">
-                        <div id="chat-messages" class="chat-box"></div>
-                        <div class="chat-input">
-                            <input type="text" id="chat-input-text" placeholder="Ask a question...">
-                            <button id="send-chat-btn">Send</button>
-                        </div>
+        <!-- Page 5: Problems & Incentives -->
+        <section id="info-page" class="page hidden">
+            <div class="card">
+                <h2>Why Use EDU System?</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h4>🛑 Common Problems</h4>
+                        <ul>
+                            <li>Confusing admission requirements.</li>
+                            <li>Difficulty comparing different university programs.</li>
+                            <li>Missing deadlines due to lack of tracking.</li>
+                            <li>Long waiting times for support.</li>
+                        </ul>
                     </div>
+                    <div class="info-item">
+                        <h4>✅ Our Solutions</h4>
+                        <ul>
+                            <li><strong>Auto-Matching:</strong> We tell you exactly where you qualify based on your grades.</li>
+                            <li><strong>Centralized Tracking:</strong> Manage all your applications in one place.</li>
+                            <li><strong>Instant Support:</strong> AI-powered chat and direct links to university reps.</li>
+                            <li><strong>Transparency:</strong> View fees, locations, and programs clearly.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="cta mt-2">
+                    <button class="primary-btn" onclick="navigateTo('degree')">Start Your Journey Now</button>
                 </div>
             </div>
         </section>

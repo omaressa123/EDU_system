@@ -54,4 +54,13 @@ def login():
         'exp': datetime.utcnow() + timedelta(hours=24)
     }, Config.SECRET_KEY, algorithm='HS256')
 
-    return jsonify({'token': token, 'user_id': user.id, 'role': user.role})
+    response_data = {
+        'token': token,
+        'user_id': user.id,
+        'role': user.role
+    }
+
+    if user.role == 'student' and hasattr(user, 'school_type'):
+        response_data['school_type'] = user.school_type
+
+    return jsonify(response_data)

@@ -9,9 +9,10 @@ const logoutBtn = document.getElementById('logout-btn');
 
 // Sections
 const authSection = document.getElementById('auth-section');
-const dashboardSection = document.getElementById('dashboard-section');
+const appNav = document.getElementById('app-nav');
 const userInfo = document.getElementById('user-info');
 const usernameDisplay = document.getElementById('username-display');
+const pages = document.querySelectorAll('.page');
 
 // Profile Form
 const resultsForm = document.getElementById('results-form');
@@ -42,6 +43,30 @@ function showTab(tab) {
         document.querySelectorAll('.tab-btn')[0].classList.remove('active');
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
     }
+}
+
+function navigateTo(pageId) {
+    // Hide all pages
+    pages.forEach(page => page.classList.add('hidden'));
+    
+    // Show requested page
+    const targetPage = document.getElementById(`${pageId}-page`);
+    if (targetPage) {
+        targetPage.classList.remove('hidden');
+    }
+
+    // Update active state in nav
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.innerText.toLowerCase().includes(pageId)) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+
+    // Load specific data if needed
+    if (pageId === 'dashboard') loadApplications();
+    if (pageId === 'search') findMatchesBtn.click(); // Auto-refresh matches when visiting search
 }
 
 // --- Auth ---
@@ -96,15 +121,21 @@ registerForm.onsubmit = async (e) => {
 
 function loginSuccess() {
     authSection.classList.add('hidden');
-    dashboardSection.classList.remove('hidden');
+    appNav.classList.remove('hidden');
     userInfo.classList.remove('hidden');
     usernameDisplay.innerText = `User ID: ${currentUser.user_id}`;
     
-    // Check school type and show relevant fields
-    // (In a real app, you'd fetch student details from the backend)
-    // For now, let's assume the user knows their type.
-    publicFields.classList.remove('hidden'); 
-    loadInitialData();
+    // Show correct fields based on school type
+    publicFields.classList.add('hidden');
+    americanFields.classList.add('hidden');
+    privateFields.classList.add('hidden');
+    
+    const type = currentUser.school_type || 'public';
+    if (type === 'public') publicFields.classList.remove('hidden');
+    else if (type === 'american') americanFields.classList.remove('hidden');
+    else if (type === 'private') privateFields.classList.remove('hidden');
+    
+    navigateTo('dashboard');
 }
 
 logoutBtn.onclick = () => {
@@ -116,22 +147,35 @@ logoutBtn.onclick = () => {
 // --- Profile ---
 resultsForm.onsubmit = async (e) => {
     e.preventDefault();
-    const score = document.getElementById('national-score').value;
-    const year = document.getElementById('exam-year').value;
+    const schoolType = currentUser.school_type || 'public';
+    let payload = {
+        student_id: currentUser.user_id,
+        school_type: schoolType
+    };
+
+    if (schoolType === 'public') {
+        payload.national_exam_score = parseFloat(document.getElementById('national-score').value);
+        payload.exam_year = document.getElementById('exam-year').value;
+    } else if (schoolType === 'american') {
+        payload.gpa = parseFloat(document.getElementById('gpa').value);
+        payload.sat_score = parseInt(document.getElementById('sat-score').value);
+    } else if (schoolType === 'private') {
+        payload.curriculum = document.getElementById('curriculum').value;
+        payload.ib_score = parseFloat(document.getElementById('ib-score').value);
+    }
 
     try {
         const response = await fetch('/api/profile/results', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                student_id: currentUser.user_id,
-                school_type: 'public',
-                national_exam_score: parseFloat(score),
-                exam_year: year
-            })
+            body: JSON.stringify(payload)
         });
         const data = await response.json();
         alert(data.message);
+        // Refresh matches if on search page
+        if (!document.getElementById('search-page').classList.contains('hidden')) {
+            findMatchesBtn.click();
+        }
     } catch (err) {
         console.error('Update results failed:', err);
     }
