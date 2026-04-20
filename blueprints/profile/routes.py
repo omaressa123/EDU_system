@@ -1,8 +1,30 @@
-from flask import Blueprint, request, jsonify
-from EDU_system.models import db, Student, PublicSchoolStudent, AmericanSchoolStudent, PrivateSchoolStudent, AcademicProfile, Document
+from flask import Blueprint, request, jsonify, render_template, flash, redirect, url_for, session
+from models import db, Student, PublicSchoolStudent, AmericanSchoolStudent, PrivateSchoolStudent, AcademicProfile, Document, Admin, University, User
 from datetime import datetime
 
 profile_bp = Blueprint('profile', __name__)
+
+@profile_bp.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if not session.get('admin_logged_in'):
+        return redirect('/admin-login')
+    
+    from models import User, University
+    admin_user = User.query.filter_by(role='admin').first()  # Simple admin lookup
+    
+    if request.method == 'POST':
+        admin_user.name = request.form['name']
+        admin_user.email = request.form['email']
+        admin_user.phone = request.form.get('phone', '')
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect('/api/profile/profile')
+    
+    total_users = User.query.count()
+    total_unis = University.query.count()
+    
+    return render_template('profile.html', current_user=admin_user, total_users=total_users, total_unis=total_unis)
+
 
 @profile_bp.route('/results', methods=['POST'])
 def enter_results():

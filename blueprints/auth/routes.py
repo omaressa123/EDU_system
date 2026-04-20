@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
-from EDU_system.models import db, User, Student, PublicSchoolStudent, AmericanSchoolStudent, PrivateSchoolStudent
+from models import db, User, Student, PublicSchoolStudent, AmericanSchoolStudent, PrivateSchoolStudent
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
-from EDU_system.config import Config
+from config import Config
 
 auth_bp = Blueprint('auth', __name__)
 

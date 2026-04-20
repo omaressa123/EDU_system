@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from EDU_system.models import db, Application, Student, University, Program, Document
+from models import db, Application, Student, University, Program, Document
 from datetime import datetime
 
 application_bp = Blueprint('application', __name__)

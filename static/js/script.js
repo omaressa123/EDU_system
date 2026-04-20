@@ -81,10 +81,14 @@ loginForm.onsubmit = async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-        const data = await response.json();
+const data = await response.json();
         if (response.ok) {
             localStorage.setItem('token', data.token);
             currentUser = data;
+            if (data.role === 'admin') {
+                window.location.href = '/admin';
+                return;
+            }
             loginSuccess();
         } else {
             alert(data.message);

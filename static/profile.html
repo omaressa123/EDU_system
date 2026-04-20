@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile - EDU System</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar (same as dashboard) -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-university"></i>
+                <h3>EDU Admin</h3>
+            </div>
+            <nav class="nav-menu">
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/admin" class="nav-item">
+                    <i class="fas fa-database"></i>
+                    <span>Manage Data</span>
+                </a>
+                <a href="/api/profile/profile" class="nav-item active">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/admin-logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </aside>
+
+        <!-- Main content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <div class="user-profile">
+                    <i class="fas fa-user"></i>
+                    <span>Admin Profile</span>
+                </div>
+            </header>
+
+            <section class="stats-section">
+                <div class="admin-main">
+                    <h1><i class="fas fa-user-edit"></i> My Profile</h1>
+                    
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="success">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST" class="profile-form">
+                        <div class="form-group">
+                            <label for="name"><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                            <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone"><i class="fas fa-phone"></i> Phone</label>
+                            <input type="tel" id="phone" name="phone" value="{{ current_user.phone or '' }}">
+                        </div>
+                        <button type="submit"><i class="fas fa-save"></i> Update Profile</button>
+                    </form>
+
+                    <div class="stats-grid" style="margin-top: 2rem;">
+                        <div class="stat-card">
+                            <i class="fas fa-users stat-icon users"></i>
+                            <div>
+                                <h3 id="totalUsers">{{ total_users }}</h3>
+                                <p>Total Users Managed</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-school stat-icon unis"></i>
+                            <div>
+                                <h3 id="totalUnis">{{ total_unis }}</h3>
+                                <p>Universities</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar toggle
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            document.querySelector('.sidebar').style.transform = 'translateX(-100%)';
+        });
+    </script>
+</body>
+</html>
+

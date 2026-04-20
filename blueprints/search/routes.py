@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from EDU_system.models import University, Student, Program, Faculty, AdmissionRequirement
-from EDU_system.utils.matching import match_universities
+from models import University, Student, Program, Faculty, AdmissionRequirement
+from utils.matching import match_universities
 
 search_bp = Blueprint('search', __name__)
 

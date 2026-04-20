@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from EDU_system.models import db, ChatSession, Message, Student, UniversityRep, FAQEntry
+from models import db, ChatSession, Message, Student, UniversityRep, FAQEntry
 from datetime import datetime
 
 chat_bp = Blueprint('chat', __name__)

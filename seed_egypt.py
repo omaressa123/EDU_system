@@ -1,7 +1,7 @@
 import csv
 import os
-from EDU_system.app import create_app
-from EDU_system.models import db, University, Faculty, Program, AdmissionRequirement, FAQEntry
+from app import create_app
+from models import db, University, Faculty, Program, AdmissionRequirement, FAQEntry
 
 app = create_app()
 

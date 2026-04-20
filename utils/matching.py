@@ -7,7 +7,7 @@ def match_universities(student, universities):
     
     # Ensure we have the full student profile including subclass attributes
     # In case student was fetched as a generic Student object
-    from EDU_system.models import PublicSchoolStudent, AmericanSchoolStudent, PrivateSchoolStudent
+    from models import PublicSchoolStudent, AmericanSchoolStudent, PrivateSchoolStudent
     
     if student.school_type == 'public':
         student = PublicSchoolStudent.query.get(student.id)

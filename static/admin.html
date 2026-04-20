@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - EDU System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">EDU System Admin</a>
+            <div class="nav-menu">
+                <a href="/admin" class="nav-link">Dashboard</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-sidebar">
+            <button class="tab-btn active" data-tab="university">Universities</button>
+            <button class="tab-btn" data-tab="faculty">Departments (Faculties)</button>
+            <button class="tab-btn" data-tab="program">Programs (w/ Grade)</button>
+        </div>
+
+        <div class="admin-main">
+            <!-- University Tab -->
+            <div id="university" class="tab-content active">
+                <h2>Add University</h2>
+                <form id="uniForm">
+                    <input type="text" id="uniName" placeholder="University Name" required>
+                    <input type="text" id="uniLocation" placeholder="Location/City" required>
+                    <input type="text" id="uniType" placeholder="Type (public/private)" required>
+                    <input type="number" id="uniMinFees" placeholder="Min Tuition Fees" step="0.01">
+                    <input type="number" id="uniMaxFees" placeholder="Max Tuition Fees" step="0.01">
+                    <textarea id="uniDesc" placeholder="Description"></textarea>
+                    <button type="submit">Add University</button>
+                </form>
+                <div id="uniList"></div>
+            </div>
+
+            <!-- Faculty Tab -->
+            <div id="faculty" class="tab-content">
+                <h2>Add Department (Faculty)</h2>
+                <form id="facForm">
+                    <select id="facUniId" required>
+                        <option value="">Select University</option>
+                    </select>
+                    <input type="text" id="facName" placeholder="Faculty/Department Name" required>
+                    <input type="number" id="facFees" placeholder="Fees" step="0.01">
+                    <input type="text" id="facDuration" placeholder="Duration (e.g. 4 years)">
+                    <button type="submit">Add Faculty</button>
+                </form>
+                <div id="facList"></div>
+            </div>
+
+            <!-- Program Tab -->
+            <div id="program" class="tab-content">
+                <h2>Add Program (Department w/ Grade)</h2>
+                <form id="progForm">
+                    <select id="progFacId" required>
+                        <option value="">Select Faculty</option>
+                    </select>
+                    <input type="text" id="progName" placeholder="Program/Department Name" required>
+                    <input type="text" id="progDegree" placeholder="Degree (BSc, BA)">
+                    <input type="number" id="progDuration" placeholder="Duration Years">
+                    <input type="number" id="progMinGrade" placeholder="Min Grade Required" step="0.01" required>
+                    <input type="text" id="progLanguage" placeholder="Language">
+                    <button type="submit">Add Program</button>
+                </form>
+                <div id="progList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading hidden">Loading...</div>
+    <div id="error" class="error hidden"></div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>
+
