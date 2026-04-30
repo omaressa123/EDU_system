@@ -186,7 +186,7 @@ def _format_intro(uni_name):
 
 
 def _format_closing(uni, content_seed):
-    return _pick_template('closing', content_seed, website=uni.website)
+    return _pick_template('closing', content_seed, website=(uni.website or "the official university website"))
 
 
 def _format_bullets(lines):
@@ -195,10 +195,21 @@ def _format_bullets(lines):
     return "\n".join([f"- {line}" for line in lines])
 
 
+def _get_gemini_api_key():
+    # Support both GEMINI_API_KEY and GOOGLE_API_KEY and strip accidental quotes.
+    raw_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if not raw_key:
+        return None
+    return raw_key.strip().strip('"').strip("'")
+
+
 def _call_gemini(user_question):
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = _get_gemini_api_key()
     if not api_key:
         return None
+
+    model_name = os.getenv("GEMINI_MODEL", GEMINI_MODEL).strip().strip('"').strip("'")
+    gemini_api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
 
     prompt = (
         "You are EDU System's AI admissions assistant.\n"
@@ -226,41 +237,38 @@ def _call_gemini(user_question):
     }
 
     req = urllib_request.Request(
-        f"{GEMINI_API_URL}?key={api_key}",
+        f"{gemini_api_url}?key={api_key}",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST"
     )
 
-    try:
-        with urllib_request.urlopen(req, timeout=8) as response:
-            raw = response.read().decode("utf-8")
-            result = json.loads(raw)
-            candidates = result.get("candidates", [])
-            if not candidates:
-                return None
-            parts = candidates[0].get("content", {}).get("parts", [])
-            if not parts:
-                return None
-            text = (parts[0].get("text") or "").strip()
-            return text or None
-    except (urllib_error.URLError, urllib_error.HTTPError, json.JSONDecodeError, TimeoutError):
-        return None
+    # Retry transient failures once to reduce "service unavailable" responses.
+    for _ in range(2):
+        try:
+            with urllib_request.urlopen(req, timeout=15) as response:
+                raw = response.read().decode("utf-8")
+                result = json.loads(raw)
+                candidates = result.get("candidates", [])
+                if not candidates:
+                    return None
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if not parts:
+                    return None
+                text = (parts[0].get("text") or "").strip()
+                return text or None
+        except urllib_error.HTTPError as e:
+            # Retry only transient/provider-side failures.
+            if e.code in (429, 500, 502, 503, 504):
+                continue
+            return None
+        except (urllib_error.URLError, json.JSONDecodeError, TimeoutError):
+            continue
+    return None
 
 
 def _generate_smart_response(user_question):
-    if not os.getenv("GEMINI_API_KEY"):
-        return (
-            "AI service is not configured yet. "
-            "Please set GEMINI_API_KEY (or GOOGLE_API_KEY) in the .env file and restart the application."
-        )
-    ai_response = _call_gemini(user_question)
-    if ai_response:
-        return ai_response
-    return (
-        "I am currently unable to reach the AI service. "
-        "Please try again in a moment, and I will provide a complete answer."
-    )
+    return _call_gemini(user_question)
 
 
 def _build_db_response(session, content):
@@ -402,6 +410,9 @@ def send_message():
     new_message = Message(session_id=chat_id, sender_id=sender_id, content=raw_content)
     db.session.add(new_message)
     bot_response = _generate_smart_response(raw_content)
+    if not bot_response:
+        # Always keep the chat responsive even if external AI provider is down.
+        bot_response = _build_db_response(session, raw_content)
 
     # 2. Store and return bot message
     faq_response = Message(
