@@ -28,13 +28,25 @@ async function loadRecentActivity() {
 }
 
 function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem('token');
-  if (!token) return Promise.resolve(null);
-  
-  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  return fetch(API_BASE + endpoint, { headers, ...options })
+  return ensureAdminToken()
+    .then(token => fetch(API_BASE + endpoint, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      ...options
+    }))
     .then(res => res.status === 401 ? (localStorage.removeItem('token'), null) : res.json().catch(() => null))
     .catch(() => null);
+}
+
+function ensureAdminToken() {
+  const token = localStorage.getItem('token');
+  if (token) return Promise.resolve(token);
+  return fetch('/admin-token', { credentials: 'same-origin' })
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+      if (!data || !data.token) return null;
+      localStorage.setItem('token', data.token);
+      return data.token;
+    });
 }
 
 function toggleTheme() {

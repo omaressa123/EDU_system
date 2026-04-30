@@ -71,19 +71,10 @@ loginForm.addEventListener('submit', async (e) => {
         const result = await response.json();
         
         if (response.ok && result.success) {
+            if (result.token) {
+                localStorage.setItem('token', result.token);
+            }
             showMessage('Login successful! Redirecting...', 'success');
-            // Also try API login for JWT token
-            try {
-                    const apiRes = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: 'admin1@gmail.com', password: 'admin1234'})
-                });
-                if (apiRes.ok) {
-                    const apiData = await apiRes.json();
-                    localStorage.setItem('token', apiData.token);
-                }
-            } catch {}
             setTimeout(() => {
                 window.location.href = '/dashboard';
             }, 1500);

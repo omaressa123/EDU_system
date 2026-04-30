@@ -1,256 +1,176 @@
-%% ============================================================
-%%  EDU System – Class Diagram
-%% ============================================================
 classDiagram
-    direction TB
-
-    %% ── User Hierarchy ────────────────────────────────────
     class User {
-        +int userId
+        +int id
         +String name
         +String email
-        +String passwordHash
+        +String password_hash
         +String phone
         +String role
-        +Date createdAt
-        +login() bool
-        +logout() void
-        +updateProfile() void
+        +DateTime created_at
+        +String type
     }
 
     class Student {
-        +String schoolType
-        +String nationalId
-        +Date birthDate
+        +String school_type
+        +String national_id
+        +Date birth_date
         +String governorate
-        +AcademicProfile academicProfile
-        +List~University~ bookmarks
-        +enterResults(data) void
-        +searchUniversities(filters) List~University~
-        +startChat(uniId) ChatSession
-        +submitApplication(uniId) Application
-        +viewApplicationStatus() String
     }
 
     class PublicSchoolStudent {
-        +double nationalExamScore
-        +String examYear
-        +Map~String,double~ subjectGrades
+        +float national_exam_score
+        +String exam_year
         +String track
-        +enterNationalExamResults() void
-        +getEligibilityScore() double
     }
 
     class AmericanSchoolStudent {
-        +int satScore
-        +int actScore
+        +int sat_score
+        +int act_score
         +double gpa
-        +List~String~ apCourses
-        +int toeflScore
-        +enterSATResults() void
-        +enterGPA() void
+        +int toefl_score
     }
 
     class PrivateSchoolStudent {
         +String curriculum
-        +double ibScore
-        +String igcseGrades
-        +String aLevelGrades
-        +enterIBResults() void
-        +enterIGCSEResults() void
+        +double ib_score
+        +String igcse_grades
+        +String a_level_grades
     }
 
     class UniversityRep {
-        +int uniId
+        +int uni_id
         +String position
-        +respondToChat(chatId, msg) void
-        +updateUniversityProfile() void
-        +viewApplicants() List~Application~
     }
 
     class Admin {
-        +manageUsers() void
-        +addUniversity(uni) void
-        +monitorChats() void
-        +generateReport() Report
-        +manageGradingSystems() void
     }
 
-    %% ── Academic Profile ──────────────────────────────────
     class AcademicProfile {
-        +int profileId
-        +int studentId
-        +String schoolType
-        +Map~String,String~ grades
-        +List~Document~ documents
-        +Date lastUpdated
-        +addDocument(doc) void
-        +calculateScore() double
-        +validate() bool
+        +int id
+        +int student_id
+        +String school_type
+        +JSON grades
+        +DateTime last_updated
     }
 
     class Document {
-        +int docId
+        +int id
+        +int profile_id
+        +int application_id
         +String type
-        +String filePath
-        +Date uploadDate
+        +String file_path
+        +DateTime upload_date
         +String status
-        +upload() void
-        +verify() bool
     }
 
-    %% ── University ────────────────────────────────────────
     class University {
-        +int uniId
+        +int id
         +String name
         +String type
         +String location
         +String city
         +String country
         +String website
-        +double minTuitionFees
-        +double maxTuitionFees
+        +double min_tuition_fees
+        +double max_tuition_fees
         +String description
-        +List~Faculty~ faculties
-        +List~String~ acceptedCurriculums
-        +getDetails() String
-        +getAdmissionRequirements() List~Requirement~
+        +JSON accepted_curriculums
+        +String scholarships
+        +String facilities
+        +String contact_email
+        +String contact_phone
+        +String accreditation
+        +String housing
+        +int founded_year
     }
 
     class Faculty {
-        +int facultyId
-        +int uniId
+        +int id
+        +int uni_id
         +String name
-        +List~Program~ programs
         +double fees
         +String duration
     }
 
     class Program {
-        +int programId
+        +int id
+        +int faculty_id
         +String name
         +String degree
-        +int durationYears
-        +double minGradeRequired
+        +int duration_years
+        +double min_grade_required
         +String language
-        +checkEligibility(profile) bool
     }
 
     class AdmissionRequirement {
-        +int reqId
-        +int uniId
-        +String schoolType
-        +double minScore
-        +List~String~ requiredDocs
-        +String additionalCriteria
-        +isMet(profile) bool
+        +int id
+        +int uni_id
+        +String school_type
+        +double min_score
+        +JSON required_docs
+        +String additional_criteria
     }
 
-    %% ── Chat System ───────────────────────────────────────
     class ChatSession {
-        +int chatId
-        +int studentId
-        +int uniRepId
-        +int uniId
-        +Date startedAt
+        +int id
+        +int student_id
+        +int uni_rep_id
+        +int uni_id
+        +DateTime started_at
         +String status
-        +List~Message~ messages
-        +sendMessage(text) void
-        +closeChat() void
-        +getChatHistory() List~Message~
     }
 
     class Message {
-        +int messageId
-        +int chatId
-        +int senderId
+        +int id
+        +int session_id
+        +int sender_id
         +String content
-        +MessageType type
-        +Date sentAt
+        +String type
+        +DateTime sent_at
         +bool isRead
-        +markAsRead() void
-    }
-
-    class FAQBot {
-        +int botId
-        +List~FAQEntry~ faqs
-        +answerQuery(question) String
-        +escalateToRep(chatId) void
     }
 
     class FAQEntry {
-        +int faqId
+        +int id
+        +int uni_id
         +String question
         +String answer
         +String category
-        +int uniId
     }
 
-    %% ── Application ───────────────────────────────────────
     class Application {
-        +int appId
-        +int studentId
-        +int uniId
-        +int programId
-        +Date submittedAt
+        +int id
+        +int student_id
+        +int uni_id
+        +int program_id
+        +DateTime submitted_at
         +String status
-        +List~Document~ attachedDocs
         +String notes
-        +submit() void
-        +withdraw() void
-        +updateStatus(status) void
     }
 
-    class Notification {
-        +int notifId
-        +int recipientId
-        +String type
-        +String message
-        +Date sentAt
-        +bool isRead
-        +send() void
-        +markRead() void
-    }
+    User <|-- Student
+    User <|-- UniversityRep
+    User <|-- Admin
+    Student <|-- PublicSchoolStudent
+    Student <|-- AmericanSchoolStudent
+    Student <|-- PrivateSchoolStudent
 
-    class Report {
-        +int reportId
-        +String type
-        +Date generatedAt
-        +String generatedBy
-        +generate() Data
-        +exportPDF() File
-    }
+    Student "1" --> "1" AcademicProfile
+    AcademicProfile "1" --> "0..*" Document
+    Student "1" --> "0..*" ChatSession
+    Student "1" --> "0..*" Application
 
-    %% ── Relationships ─────────────────────────────────────
-    User <|-- Student              : extends
-    User <|-- UniversityRep        : extends
-    User <|-- Admin                : extends
-    Student <|-- PublicSchoolStudent  : extends
-    Student <|-- AmericanSchoolStudent : extends
-    Student <|-- PrivateSchoolStudent  : extends
+    University "1" --> "0..*" Faculty
+    Faculty "1" --> "0..*" Program
+    University "1" --> "0..*" AdmissionRequirement
+    University "1" --> "0..*" FAQEntry
 
-    Student "1" *-- "1" AcademicProfile    : has
-    AcademicProfile "1" *-- "0..*" Document : contains
+    ChatSession "1" --> "0..*" Message
+    ChatSession "*" --> "1" University
+    ChatSession "*" --> "1" Student
+    ChatSession "*" --> "0..1" UniversityRep
 
-    Student "1" --> "0..*" Application     : submits
-    Student "1" --> "0..*" ChatSession     : starts
-    Student "0..*" --> "0..*" University   : bookmarks
-
-    University "1" *-- "1..*" Faculty      : has
-    University "1" *-- "1..*" AdmissionRequirement : defines
-    Faculty "1" *-- "1..*" Program         : offers
-
-    ChatSession "1" *-- "0..*" Message     : contains
-    ChatSession "1" --> "1" UniversityRep  : handled by
-    ChatSession "1" --> "0..1" FAQBot      : assisted by
-    FAQBot "1" *-- "0..*" FAQEntry         : stores
-
-    Application "1" --> "1" University     : targets
-    Application "1" --> "1" Program        : for
-    Application "1" --> "0..*" Document    : attaches
-
-    Admin "1" --> "0..*" Report            : generates
-    Admin "1" --> "0..*" University        : manages
-
-    Notification --> Student               : sent to
-    Notification --> UniversityRep         : sent to
+    Application "*" --> "1" Student
+    Application "*" --> "1" University
+    Application "*" --> "1" Program
+    Application "1" --> "0..*" Document
