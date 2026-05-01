@@ -7,6 +7,7 @@ from blueprints.search import search_bp
 from blueprints.chat import chat_bp
 from blueprints.application import application_bp
 from blueprints.admin import admin_bp
+from blueprints.document_ai import document_ai_bp
 from models import User
 from werkzeug.security import check_password_hash
 from datetime import datetime, timedelta
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(chat_bp, url_prefix='/api/chat')
     app.register_blueprint(application_bp, url_prefix='/api/application')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
+    app.register_blueprint(document_ai_bp, url_prefix='/api/document-ai')
 
     @app.route('/')
     def home():

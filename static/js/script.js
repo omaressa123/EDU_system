@@ -1,6 +1,8 @@
 // State Management
 let currentUser = null;
 let currentChatId = null;
+let latestCvExtractedText = '';
+let latestCvAnalysis = null;
 
 // Auth Forms
 const loginForm = document.getElementById('login-form');
@@ -29,6 +31,14 @@ const matchesList = document.getElementById('matches-list');
 const chatMessages = document.getElementById('chat-messages');
 const chatInputText = document.getElementById('chat-input-text');
 const sendChatBtn = document.getElementById('send-chat-btn');
+const cvAnalyzerForm = document.getElementById('cv-analyzer-form');
+const cvFileInput = document.getElementById('cv-file');
+const targetUniversityInput = document.getElementById('target-university');
+const cvActions = document.getElementById('cv-actions');
+const cvAnalysisOutput = document.getElementById('cv-analysis-output');
+const cvImprovedOutput = document.getElementById('cv-improved-output');
+const improveCvBtn = document.getElementById('improve-cv-btn');
+const generateTemplateBtn = document.getElementById('generate-template-btn');
 
 // --- Navigation ---
 function showTab(tab) {
@@ -315,4 +325,145 @@ function addMessage(text, type) {
 
 function loadInitialData() {
     loadApplications();
+}
+
+// --- CV Analyzer ---
+cvAnalyzerForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const file = cvFileInput.files[0];
+    if (!file) {
+        alert('Please choose a file first.');
+        return;
+    }
+
+    const payload = new FormData();
+    payload.append('file', file);
+    payload.append('university_name', targetUniversityInput.value || '');
+
+    cvAnalysisOutput.innerHTML = '<p>Analyzing file, please wait...</p>';
+    cvImprovedOutput.innerHTML = '';
+    cvActions.classList.add('hidden');
+
+    try {
+        const response = await fetch('/api/document-ai/analyze', {
+            method: 'POST',
+            body: payload
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            cvAnalysisOutput.innerHTML = `<p>${data.message || 'Analysis failed.'}</p>`;
+            return;
+        }
+
+        latestCvExtractedText = data.extracted_text || '';
+        latestCvAnalysis = data.analysis || null;
+        renderCvAnalysis(data.analysis, data.file_name);
+        cvActions.classList.remove('hidden');
+    } catch (err) {
+        console.error('CV analysis failed:', err);
+        cvAnalysisOutput.innerHTML = '<p>Analysis failed due to a network error.</p>';
+    }
+};
+
+improveCvBtn.onclick = async () => {
+    if (!latestCvExtractedText) {
+        alert('Analyze a file first.');
+        return;
+    }
+
+    cvImprovedOutput.innerHTML = '<p>Generating improved CV...</p>';
+    try {
+        const response = await fetch('/api/document-ai/improve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: latestCvExtractedText,
+                university_name: targetUniversityInput.value || ''
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            cvImprovedOutput.innerHTML = `<p>${data.message || 'Failed to improve CV.'}</p>`;
+            return;
+        }
+
+        const validation = (data.improvement?.validation || [])
+            .map(item => `<li><strong>${item.problem}:</strong> ${item.how}</li>`)
+            .join('');
+
+        cvImprovedOutput.innerHTML = `
+            <div class="match-card">
+                <h4>Improved CV Draft</h4>
+                <pre class="json-output">${escapeHtml(data.improvement?.improved_text || '')}</pre>
+                <h4>Fix Validation</h4>
+                <ul>${validation || '<li>No fixes applied.</li>'}</ul>
+            </div>
+        `;
+    } catch (err) {
+        console.error('Improve CV failed:', err);
+        cvImprovedOutput.innerHTML = '<p>Could not generate improved CV.</p>';
+    }
+};
+
+generateTemplateBtn.onclick = async () => {
+    if (!latestCvAnalysis || !Array.isArray(latestCvAnalysis.missing) || latestCvAnalysis.missing.length === 0) {
+        alert('No missing sections detected.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/document-ai/template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ missing_sections: latestCvAnalysis.missing })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.message || 'Template generation failed.');
+            return;
+        }
+
+        const templatesHtml = Object.entries(data.templates || {})
+            .map(([section, template]) => `
+                <div class="match-card">
+                    <h4>${section}</h4>
+                    <pre class="json-output">${escapeHtml(template)}</pre>
+                </div>
+            `)
+            .join('');
+
+        cvImprovedOutput.innerHTML = templatesHtml || '<p>No templates generated.</p>';
+    } catch (err) {
+        console.error('Template generation failed:', err);
+        alert('Could not generate templates.');
+    }
+};
+
+function renderCvAnalysis(analysis, filename) {
+    const payload = {
+        score: analysis?.score ?? 0,
+        found: analysis?.found || [],
+        missing: analysis?.missing || [],
+        weakness: analysis?.weakness || [],
+        issues: analysis?.issues || [],
+        suggestions: analysis?.suggestions || [],
+        specialization_feedback: analysis?.specialization_feedback || '',
+        warnings: analysis?.warnings || []
+    };
+
+    cvAnalysisOutput.innerHTML = `
+        <div class="match-card">
+            <h4>Analysis Result: ${filename}</h4>
+            <pre class="json-output">${escapeHtml(JSON.stringify(payload, null, 2))}</pre>
+        </div>
+    `;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 }

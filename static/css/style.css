@@ -292,3 +292,25 @@ background-color: #E3C39D;
 .mt-2 {
     margin-top: 1.5rem;
 }
+
+#cv-analyzer-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+#cv-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.json-output {
+    white-space: pre-wrap;
+    background: #f7f7f7;
+    border: 1px solid #ececec;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+}

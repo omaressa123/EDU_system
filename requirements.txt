@@ -7,3 +7,7 @@ Flask-RESTful>=0.3.10
 PyJWT>=2.8.0
 werkzeug>=3.0.0
 gunicorn>=21.2.0
+PyPDF2>=3.0.1
+pytesseract>=0.3.10
+Pillow>=10.0.0
+python-docx>=1.1.2

@@ -16,6 +16,7 @@
                 <button class="nav-link" onclick="navigateTo('degree')">Enter Degree</button>
                 <button class="nav-link" onclick="navigateTo('search')">Find Universities</button>
                 <button class="nav-link" onclick="navigateTo('chat')">Chat Support</button>
+                <button class="nav-link" onclick="navigateTo('cv')">CV Analyzer</button>
                 <button class="nav-link" onclick="navigateTo('info')">Why Us?</button>
             </div>
             <div id="user-info" class="hidden">
@@ -121,7 +122,26 @@
             </div>
         </section>
 
-        <!-- Page 5: Problems & Incentives -->
+        <!-- Page 5: CV Analyzer -->
+        <section id="cv-page" class="page hidden">
+            <div class="card">
+                <h3>CV & Certificate Analyzer</h3>
+                <p>Upload PDF, DOCX, or image files to get structured analysis and actionable fixes.</p>
+                <form id="cv-analyzer-form" class="mt-2">
+                    <input type="file" id="cv-file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.bmp,.tiff" required>
+                    <input type="text" id="target-university" placeholder="Target university (e.g., GUC / Cairo University)">
+                    <button type="submit">Analyze File</button>
+                </form>
+                <div id="cv-actions" class="mt-2 hidden">
+                    <button id="improve-cv-btn" class="primary-btn">Improve my CV</button>
+                    <button id="generate-template-btn" class="primary-btn">Generate missing templates</button>
+                </div>
+                <div id="cv-analysis-output" class="results-container mt-2"></div>
+                <div id="cv-improved-output" class="results-container mt-2"></div>
+            </div>
+        </section>
+
+        <!-- Page 6: Problems & Incentives -->
         <section id="info-page" class="page hidden">
             <div class="card">
                 <h2>Why Use EDU System?</h2>
